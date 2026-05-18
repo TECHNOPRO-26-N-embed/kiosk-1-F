@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int* refund(unsigned int money, unsigned int price) {
+int** refund(unsigned int money, unsigned int price) {
     int result, ten, fifty, hundred, five_hundred, thousand;
     int* return_money[5] = {&ten, &fifty, &hundred, &five_hundred, &thousand};
     if (money < price) {

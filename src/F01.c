@@ -1,12 +1,13 @@
 #include <stdio.h>
 
-typedef struct{
+typedef struct MONO{
     int id;
     char name[256];
 } MONO;
-int main(){
+
+void drink(){
     int count =0;
-     MONO data[50] = {
+    MONO data[50] = {
         {1, "A"},
         {2, "B"},
         {3, "C"},
