@@ -1,7 +1,8 @@
 #include <stdio.h>>
 #include "global.c"
+#include "F01.c"
 
-int current_deposit=0;
+int total_money=0;
 
 void handle_deposit(){
     int coin_1000=0;
@@ -33,7 +34,7 @@ void handle_deposit(){
     return;
 
     total_coin = coin_1000 * 1000 + coin_500 * 500 + coin_100 * 100 + coin_50 * 50 + coin_10 * 10;
-    current_deposit += total_coin;
+    total_money += total_coin;
 
-    printf("現在の預り金: %d円\n", current_deposit);
+    printf("現在の預り金: %d円\n", total_money);
 }
