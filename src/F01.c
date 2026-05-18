@@ -5,6 +5,7 @@ typedef struct{
     char name[256];
 } MONO;
 int main(){
+    int count =0;
      MONO data[50] = {
         {1, "A"},
         {2, "B"},
@@ -57,7 +58,11 @@ int main(){
         {49, "AW"},
         {50, "AX"},
     };
-    for(int i = 0; i < 50;i++){
-        printf("%d: %s\n", data[i].id, data[i].name);
+    for(int i = 0; i < 5;i++){
+        for(int j = 0; j < 10;j++){
+             printf("%d: %s\t", data[count].id, data[count].name);
+            count++;
+        }
+        printf("\n");
     }
 }
