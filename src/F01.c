@@ -5,7 +5,7 @@ typedef struct MONO{
     char name[256];
 } MONO;
 
-void drink(){
+void drink(void){
     int count =0;
     MONO data[50] = {
         {1, "A"},
