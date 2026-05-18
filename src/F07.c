@@ -14,7 +14,7 @@ void change_product(const char* csv_file, const char* old_product, const char* n
     char line[256];
     while( fgets(line, sizeof(line), file) != NULL){
         char product_name[PRODUCT_NAME_MAX_LENGTH];
-        if(sscanf(line, "%99[^,]", product_name) == 1){//"%99[^,]"は、カンマまでの文字列を読み取るフォーマット指定子
+        if(sscanf(line, "%s,%99[^,],%*d,%d", product_name) == 1){//"%99[^,]"は、カンマまでの文字列を読み取るフォーマット指定子
             if(strcmp(product_name, old_product) == 0){
                 fseek(file, -strlen(line), SEEK_CUR); // 行の先頭に戻る SEEK_CUR=現在のファイル位置
                 fprintf(file, "%s,%s,%d,%d", ID, new_product, *new_product_price, 50); // 新製品名と新製品の価格を書き込む
