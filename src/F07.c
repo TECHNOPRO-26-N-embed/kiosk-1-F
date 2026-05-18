@@ -9,7 +9,7 @@ void change_product(const char* csv_file, const char* old_product, const char* n
     const char* ID = product_id;
     if (file == NULL){
         printf("ファイルが開けませんでした");
-        return 1;
+        return;
     }
     char line[256];
     while( fgets(line, sizeof(line), file) != NULL){
@@ -26,7 +26,7 @@ void change_product(const char* csv_file, const char* old_product, const char* n
     printf("変更後の製品: %s, 価格: %d\n", new_product, *new_product_price);
     fclose(file);
 
-    return 0;
+    return;
 }
 
 // CSVから商品を読み込み、全製品の商品在庫数を50に更新する関数
@@ -34,7 +34,7 @@ void update_stock(const char* csv_file){
     FILE *file = fopen(csv_file, "w");// 書き込みモードでファイルを開く
     if (file == NULL){
         printf("ファイルが開けませんでした");
-        return 1;
+        return ;
     }
     // 在庫数を50に更新する処理をここに追加
     char line[256];
@@ -49,5 +49,5 @@ void update_stock(const char* csv_file){
     }
     fclose(file);
 
-    return 0;
+    return;
 }

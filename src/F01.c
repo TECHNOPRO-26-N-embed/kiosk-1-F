@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-typedef struct{
+typedef struct MONO{
     int id;
     int price;
     int stock;
