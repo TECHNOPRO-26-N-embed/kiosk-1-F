@@ -19,6 +19,7 @@ int main(void) {
         printf("1: お金を入れる\n");
         printf("2: 飲み物を選ぶ\n");
         printf("3: 在庫を補充する\n");
+        printf("4: 製品を変更する\n");
         printf("8: 購入キャンセル\n");
         printf("9: 終了\n");
         if(scanf("%d", &user_input) != 1 && (user_input < 1 || user_input > 9)) {
@@ -36,6 +37,9 @@ int main(void) {
                 break;
             case 3:
                 update_stock();
+                break;
+            case 4:
+                change_product();
                 break;
             case 8:
                 cancel();
