@@ -1,35 +1,67 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include "global.c"
+#include "F01.h"
 
-int main(void) {
-    int price = 120;
-    int pay = 500;
-    int change;
+static int coin_100_stock = 5;
+static int coin_50_stock = 5;
+static int coin_10_stock = 5;
 
-    int coin_100 = 5;
-    int coin_50 = 5;
-    int coin_10 = 5;
+bool can_make_change(int change, int *out100, int *out50, int *out10) {
+    for (int use100 = change / 100; use100 >= 0; use100--) {
+        if (use100 > coin_100_stock) continue;
+        int remain_after_100 = change - use100 * 100;
 
-    int n100, n50, n10;
-    change = pay - price;
+        for (int use50 = remain_after_100 / 50; use50 >= 0; use50--) {
+            if (use50 > coin_50_stock) continue;
+            int remain_after_50 = remain_after_100 - use50 * 50;
 
-    n100 = change / 100;
-    change %= 100;
+            if (remain_after_50 % 10 != 0) continue;
+            int use10 = remain_after_50 / 10;
+            if (use10 > coin_10_stock) continue;
 
-    n50 = change / 50;
-    change %= 50;
+            *out100 = use100;
+            *out50 = use50;
+            *out10 = use10;
+            return true;
+        }
+    }
+    return false;
+}
 
-    n10 = change / 10;
+void dispense_change(int change, int use100, int use50, int use10) {
+    coin_100_stock -= use100;
+    coin_50_stock -= use50;
+    coin_10_stock -= use10;
 
-    if (n100 > coin_100 || n50 > coin_50 || n10 > coin_10) 
-    {
-        printf("お釣りが足りません。\n");
-    } else {
-        printf("お釣りは%d円です。\n", pay - price);
-        printf("100円玉: %d枚\n", n100);
-        printf("50円玉: %d枚\n", n50);
-        printf("10円玉: %d枚\n", n10);
+    printf("おつりは %d 円です。\n", change);
+    printf("100円玉: %d 枚\n", use100);
+    printf("50円玉: %d 枚\n", use50);
+    printf("10円玉: %d 枚\n", use10);
+    printf("おつりを出しました。\n");
+}
 
+void handle_change_after_purchase(int price) {
+    int change = total_money - price;
+
+    if (total_money < price) {
+        printf("支払金額が不足しています。購入できません。\n");
+        return;
+    }
+    if (change == 0) {
+        printf("ぴったり支払われました。おつりはありません。\n");
+        total_money = 0;
+        return;
     }
 
-    return 0;
+    int use100 = 0, use50 = 0, use10 = 0;
+    if (!can_make_change(change, &use100, &use50, &use10)) {
+        printf("おつりが用意できません。\n");
+        printf("%d円を返金します。\n", total_money);
+        total_money = 0;
+        return;
+    }
+
+    dispense_change(change, use100, use50, use10);
+    total_money = 0;
 }
