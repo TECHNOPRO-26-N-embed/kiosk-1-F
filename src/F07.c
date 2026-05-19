@@ -5,7 +5,7 @@
 
 // CSVから商品情報を読み込み、特定の製品を新製品に更新
 void change_product(const char* old_product, const char* new_product, const int* new_product_price, const char* product_id) {
-    FILE *file = fopen("products.csv", "w");// 書き込みモードでファイルを開く
+    FILE *file = fopen("../product.csv", "r+");// 書き込みモードでファイルを開く
     const char* ID = product_id;
     if (file == NULL){
         printf("ファイルが開けませんでした");
@@ -31,24 +31,31 @@ void change_product(const char* old_product, const char* new_product, const int*
 
 // CSVから商品を読み込み、全製品の商品在庫数を50に更新する関数
 void update_stock(){
-    FILE *file = fopen("../products.csv", "w");// 書き込みモードでファイルを開く
+    FILE *file = fopen("product.csv", "r+");// 書き込みモードでファイルを開く
     if (file == NULL){
         printf("ファイルが開けませんでした");
         return ;
     }
-    // 在庫数を50に更新する処理をここに追加
-    char line[256];
+    // 在庫数を50に更新する処理
+    char line[1024];
     //ヘッダー行の読み飛ばし
-    fgets(line, sizeof(line), file);
+    if (fgets(line, sizeof(line), file) == NULL) {
+        printf("ファイルの読み取りに失敗しました\n");
+        fclose(file);
+        return;
+    }
     while( fgets(line, sizeof(line), file) != NULL){
         char product_name[PRODUCT_NAME_MAX_LENGTH];
         int price;
         int stock;
         char ID[10];//例:D01
-        if(sscanf(line, "%s,%99[^,],%*d,%d", ID,product_name, &price, &stock) == 2){//"%99[^,],%*d,%d"は、カンマまでの文字列を読み取るフォーマット指定子
-            fseek(file, -strlen(line), SEEK_CUR); // 行の先頭に戻る SEEK_CUR=現在のファイル位置
-            fprintf(file, "%s,%s,%d,%d\n", ID, product_name, price, 50); // 製品名と価格を書き込む
-        }printf("%sの在庫数を50に更新しました\n", ID);
+        if(sscanf(line, "%s,%99[^,],%*d,%d", ID,product_name, &price, &stock) == 0){//"%99[^,],%*d,%d"は、カンマまでの文字列を読み取るフォーマット指定子    
+            printf("行の読み取りに失敗しました: %s\n", line);
+            continue;        
+        }
+        fseek(file, -strlen(line), SEEK_CUR); // 行の先頭に戻る SEEK_CUR=現在のファイル位置
+        fprintf(file, "%s,%s,%d,%d\n", ID, product_name, price, 50); // 製品名と価格を書き込む
+        printf("%sの在庫数を50に更新しました\n", ID);
     }
     fclose(file);
     printf("全製品の在庫数を50に補充しました\n");
