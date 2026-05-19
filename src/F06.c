@@ -33,6 +33,8 @@ void refund() {
     printf("50円%d\n", fifty);
     printf("10円%d\n", ten);
 
+    total_money = 0; // 預り金をリセット
+
     printf("お釣りを返却しました。終了します。\n");
     
     return;
@@ -44,5 +46,6 @@ void cancel() {
         return;
     }
     printf("残高%d円を返却します。\n", total_money);
+    total_money = 0; // 預り金をリセット
     return;
 }
