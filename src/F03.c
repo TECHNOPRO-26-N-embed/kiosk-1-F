@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "global.c"
-#include "F01.c"
+#include "F01.h"
 
 void select_drink(MONO mono[]){
     int drink_choice=0;

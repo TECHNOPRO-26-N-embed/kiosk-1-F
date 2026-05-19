@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "global.c"
-#include "F01.c"
+#include "F01.h"
 
 int total_money=0;
 

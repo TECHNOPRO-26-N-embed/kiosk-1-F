@@ -1,18 +1,13 @@
 #include <stdio.h>
+#include "F01.h"
 
-typedef struct MONO{
-    int id;
-    int price;
-    int stock;
-    char name[256];
-} MONO;
 
- /// @brief 
- void drink(){
+ /// @brief ドリンクの情報を表示する関数
+ int Drink(){
     int count =0;
      MONO data[50] = {
         {1, 100, 50, "A"},
-        {2, 100, 50,"B"},
+        {2, 100, 50, "B"},
         {3, 100, 50, "C"},
         {4, 100, 50, "D"},
         {5, 100, 50, "E"},
@@ -69,4 +64,5 @@ typedef struct MONO{
         }
         printf("\n");
     }
+    return 0;
 }
