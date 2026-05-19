@@ -16,6 +16,8 @@ void select_drink(MONO mono[]){
     MONO selected_drink = mono[drink_choice-1];
     printf("選択された飲み物: %s(%d円)\n", selected_drink.name, selected_drink.price);
     if (total_money>=selected_drink.price&& selected_drink.stock>0){
+        total_money -= selected_drink.price;
+        mono[drink_choice-1].stock--;
         printf("購入が成功しました。\n");
     }else if(total_money<selected_drink.price){
         printf("申し訳ありませんが、預り金が不足しています。\n");

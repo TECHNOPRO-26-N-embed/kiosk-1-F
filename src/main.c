@@ -18,7 +18,9 @@ int main(void) {
         printf("=== 操作 ===\n");
         printf("1: お金を入れる\n");
         printf("2: 飲み物を選ぶ\n");
-        printf("9: 買い物終了\n");
+        printf("3: 在庫を補充する\n");
+        printf("8: 購入キャンセル\n");
+        printf("9: 終了\n");
         if(scanf("%d", &user_input) != 1 && (user_input < 1 || user_input > 9)) {
             printf("error: 半角数字1~9で入力してください。\n");
             while (getchar() != '\n');
@@ -32,8 +34,13 @@ int main(void) {
                 select_drink(data);
                 refund();
                 break;
-            case 9:
+            case 3:
+                update_stock();
+                break;
+            case 8:
                 cancel();
+                break;
+            case 9:
                 printf("終了します。\n");
                 break;
             default:
