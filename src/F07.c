@@ -28,18 +28,32 @@ void change_product() {
     // printf("変更後の製品: %s, 価格: %d\n", new_product, *new_product_price);
     // fclose(file);
     // F01.hで定義されているdata配列を使用して製品を変更する
+    int flag = 0;
     char old_product[PRODUCT_NAME_MAX_LENGTH];
     char new_product[PRODUCT_NAME_MAX_LENGTH];
     int new_product_price;
-    printf("変更前の製品の名前を入力してください: ");
-    scanf("%s", old_product);
-    printf("変更後の製品の名前を入力してください: ");
-    scanf("%s", new_product);
-    printf("変更後の製品の価格を入力してください: ");
-    if (scanf("%d", &new_product_price) != 1) {
-        printf("価格の入力に失敗しました\n");
-        return;
-    }
+    do{
+        printf("変更前の製品の名前を入力してください: ");
+        if (scanf("%s", old_product) != 1) {
+            printf("製品名の入力に失敗しました\n");
+            while (getchar() != '\n');
+            continue;
+        }
+        printf("変更後の製品の名前を入力してください: ");
+        if (scanf("%s", new_product) != 1) {
+            printf("製品名の入力に失敗しました\n");
+            while (getchar() != '\n');
+            continue;
+        }
+        
+        printf("変更後の製品の価格を入力してください: ");
+        if (scanf("%d", &new_product_price) != 1) {
+            printf("価格の入力に失敗しました\n");
+            while (getchar() != '\n');
+            continue;
+        }
+        flag = 1;
+    }while(flag == 0);
     for(int i = 0; i < 50; i++){
         if(strcmp(data[i].name, old_product) == 0){
             strncpy(data[i].name, new_product, sizeof(data[i].name)-1);
