@@ -3,7 +3,7 @@
 #include "F01.c"
 #include "F02.c"
 #include "F03.c"
-#include "F04.c"
+// #include "F04.c"
 // #include "F05.c"
 #include "F06.c"
 #include "F07.c"
@@ -25,6 +25,9 @@ int main(void) {
         switch(user_input) {
             case 1:
                 handle_deposit();
+                break;
+            case 9:
+                printf("終了します。\n");
                 break;
             default:
                 printf("無効な選択です。もう一度入力してください。\n");
