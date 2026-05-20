@@ -1,21 +1,23 @@
 #include <stdio.h>
 #include "global.h"
-#include "ai_F01.c"
-#include "ai_F07.c"
-#include "ai_F08.c"
-#include "ai_F11.c"
-#include "ai_F12.c"
-#include "ai_F14.c"
+
+/* 関数プロトタイプ（各ai_Fxx.cで実装） */
+void displayProductList(void);
+void initializeSystem(void);
+int executePurchase(void);
+int showAndSaveLogs(void);
+
+static void flushInputBufferMain(void)
+{
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+        ;
+    }
+}
 
 /* ===== メイン関数 ===== */
 int main(void) {
     int userInput = 0;
-    int productId;
-    int quantity;
-    int subtotal;
-    int insertedAmount;
-    int change;
-    Transaction trans = {0};
 
     initializeSystem();
 
@@ -29,53 +31,19 @@ int main(void) {
 
         if (scanf("%d", &userInput) != 1) {
             printf("error: 半角数字で入力してください。\n");
+            flushInputBufferMain();
             continue;
         }
+        flushInputBufferMain();
 
         switch (userInput) {
         case 1:
             displayProductList();
             break;
         case 2:
-            // 商品選択（F07）
-            productId = selectProduct();
-            if (productId < 0) {
-                printf("商品選択がキャンセルされました。\n");
-                break;
+            if (executePurchase() != 0) {
+                printf("購入処理が完了しませんでした。\n");
             }
-
-            // 数量入力（F08）
-            if (inputQuantity(productId, &quantity) != 0) {
-                printf("数量入力に失敗しました。\n");
-                break;
-            }
-
-            // 釣銭計算（F11）
-            subtotal = quantity * 100; // 仮に単価100円とする
-            printf("小計: %d 円\n", subtotal);
-            insertedAmount = 500; // 仮に500円投入
-            change = calculateChange(insertedAmount, subtotal);
-            if (change < 0) {
-                printf("投入金額が不足しています。\n");
-                break;
-            }
-            printChange(change);
-
-            // 購入確定（F12）
-            trans.transaction_id = 1; // 仮の取引ID
-            trans.product_id = productId;
-            trans.quantity = quantity;
-            trans.unit_price = 100; // 仮の単価
-            trans.subtotal = subtotal;
-            trans.inserted_amount = insertedAmount;
-            trans.change_amount = change;
-
-            if (finalizeTransaction(&trans) != 0) {
-                printf("購入確定に失敗しました。\n");
-                break;
-            }
-
-            printf("購入が正常に完了しました。\n");
             break;
         case 3:
             showAndSaveLogs();

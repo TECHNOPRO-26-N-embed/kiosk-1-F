@@ -25,29 +25,29 @@ void displayProductList(void) {
 }
 
 // メイン関数（テスト用）
-int main() {
-    // グローバル変数に初期データをセット
-    g_product_count = 3;
-    g_products[0].product_id = 1;
-    strcpy(g_products[0].product_name, "コーラ");
-    g_products[0].price = 120;
-    g_products[0].stock = 10;
-    g_products[0].is_active = 1;
+// int main() {
+//     // グローバル変数に初期データをセット
+//     g_product_count = 3;
+//     g_products[0].product_id = 1;
+//     strcpy(g_products[0].product_name, "コーラ");
+//     g_products[0].price = 120;
+//     g_products[0].stock = 10;
+//     g_products[0].is_active = 1;
 
-    g_products[1].product_id = 2;
-    strcpy(g_products[1].product_name, "お茶");
-    g_products[1].price = 100;
-    g_products[1].stock = 20;
-    g_products[1].is_active = 1;
+//     g_products[1].product_id = 2;
+//     strcpy(g_products[1].product_name, "お茶");
+//     g_products[1].price = 100;
+//     g_products[1].stock = 20;
+//     g_products[1].is_active = 1;
 
-    g_products[2].product_id = 3;
-    strcpy(g_products[2].product_name, "水");
-    g_products[2].price = 80;
-    g_products[2].stock = 15;
-    g_products[2].is_active = 1;
+//     g_products[2].product_id = 3;
+//     strcpy(g_products[2].product_name, "水");
+//     g_products[2].price = 80;
+//     g_products[2].stock = 15;
+//     g_products[2].is_active = 1;
 
-    // 商品一覧表示
-    displayProductList();
+//     // 商品一覧表示
+//     displayProductList();
 
-    return 0;
-}
+//     return 0;
+// }

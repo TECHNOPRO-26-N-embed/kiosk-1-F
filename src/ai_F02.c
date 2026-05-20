@@ -39,7 +39,7 @@ void registerProduct(void) {
            new_product.product_id, new_product.product_name, new_product.price, new_product.stock);
 }
 
-int main(void) {
-    registerProduct();
-    return 0;
-}
+// int main(void) {
+//     registerProduct();
+//     return 0;
+// }

@@ -65,16 +65,16 @@ int receivePayment(int subtotal, int *amountReceivedOut)
 	return 0;
 }
 
-#ifdef TEST_F10_MAIN
-int main(void)
-{
-	int amountReceived = 0;
-	int result = receivePayment(240, &amountReceived);
+// #ifdef TEST_F10_MAIN
+// int main(void)
+// {
+// 	int amountReceived = 0;
+// 	int result = receivePayment(240, &amountReceived);
 
-	if (result == 0) {
-		printf("最終投入金額: %d 円\n", amountReceived);
-	}
+// 	if (result == 0) {
+// 		printf("最終投入金額: %d 円\n", amountReceived);
+// 	}
 
-	return 0;
-}
-#endif
+// 	return 0;
+// }
+// #endif

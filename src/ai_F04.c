@@ -35,24 +35,24 @@ void deleteProduct(void) {
     printf("\n商品が正常に削除されました（無効化）。\n");
 }
 
-int main(void) {
-    g_product_count = 3;
-    g_products[0] = (Product){1, "コーラ", 120, 10, 1};
-    g_products[1] = (Product){2, "お茶", 100, 20, 1};
-    g_products[2] = (Product){3, "水", 80, 15, 1};
+// int main(void) {
+//     g_product_count = 3;
+//     g_products[0] = (Product){1, "コーラ", 120, 10, 1};
+//     g_products[1] = (Product){2, "お茶", 100, 20, 1};
+//     g_products[2] = (Product){3, "水", 80, 15, 1};
 
-    deleteProduct();
+//     deleteProduct();
 
-    printf("\n現在の商品一覧（有効商品のみ表示）:\n");
-    for (int i = 0; i < g_product_count; i++) {
-        if (g_products[i].is_active) {
-            printf("ID: %d, 商品名: %s, 価格: %d, 在庫数: %d\n",
-                   g_products[i].product_id,
-                   g_products[i].product_name,
-                   g_products[i].price,
-                   g_products[i].stock);
-        }
-    }
+//     printf("\n現在の商品一覧（有効商品のみ表示）:\n");
+//     for (int i = 0; i < g_product_count; i++) {
+//         if (g_products[i].is_active) {
+//             printf("ID: %d, 商品名: %s, 価格: %d, 在庫数: %d\n",
+//                    g_products[i].product_id,
+//                    g_products[i].product_name,
+//                    g_products[i].price,
+//                    g_products[i].stock);
+//         }
+//     }
 
-    return 0;
-}
+//     return 0;
+// }

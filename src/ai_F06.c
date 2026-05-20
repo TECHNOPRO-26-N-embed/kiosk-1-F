@@ -56,12 +56,12 @@ void replaceProduct(void) {
            g_products[index].stock);
 }
 
-int main(void) {
-    g_product_count = 3;
-    g_products[0] = (Product){1, "コーラ", 120, 10, 1};
-    g_products[1] = (Product){2, "お茶", 100, 20, 1};
-    g_products[2] = (Product){3, "水", 80, 15, 1};
+// int main(void) {
+//     g_product_count = 3;
+//     g_products[0] = (Product){1, "コーラ", 120, 10, 1};
+//     g_products[1] = (Product){2, "お茶", 100, 20, 1};
+//     g_products[2] = (Product){3, "水", 80, 15, 1};
 
-    replaceProduct();
-    return 0;
-}
+//     replaceProduct();
+//     return 0;
+// }
