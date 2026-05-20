@@ -39,7 +39,7 @@
 | F05    | 在庫数自動更新       | 購入時に在庫数を自動で減算する                           |
 | F06    | 商品入れ替え         | 商品の入れ替え（新商品への差し替え）に対応する            |
 | F07    | 商品選択             | ユーザーが購入する商品を選択する                         |
-| F08    | 数量入力             | ユーザーが購入する数量を入力する                         |
+| F08    | 数量入力             | 数量入力は行わず、商品選択後は常に1個購入として現金投入受付に進む                         |
 | F09    | 合計金額表示         | 選択商品・数量に応じた合計金額を表示する                  |
 | F10    | 現金投入受付         | ユーザーから現金を受け付ける                             |
 | F11    | 釣銭計算・返却       | 必要に応じて釣銭を計算し返却する                          |
@@ -408,14 +408,14 @@ int finalizeTransaction(Transaction* trans);
 1. displayProductList() で商品一覧を表示
 2. selectProduct() で商品を選択 → productId を取得
    - キャンセル（戻り値 -1）なら return -1
-3. inputQuantity(productId, &quantity) で購入数量を入力
-   - 在庫不足（戻り値 -2）なら "在庫不足" と表示して2.に戻る
-4. subtotal = calculateSubtotal(price, quantity)
+3. 購入数量は常に1個とする（quantity = 1）
+   - 在庫不足なら "在庫不足" と表示して2.に戻る
+4. subtotal = calculateSubtotal(price, 1)
 5. receivePayment(subtotal, &amountReceived)
    - 不足（戻り値 -1）なら 差額を表示して5.に戻る
 6. change = calculateChange(amountReceived, subtotal)
 7. 取引情報をTransaction構造体に格納
-8. 在庫を減算：g_productMaster[].stock -= quantity
+8. 在庫を減算：g_productMaster[].stock -= 1
 9. finalizeTransaction(&trans) でログ保存
 10. "購入完了" メッセージと釣銭を表示
 11. return 0

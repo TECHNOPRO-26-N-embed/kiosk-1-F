@@ -40,45 +40,10 @@ static int readInt08(const char *prompt, int *outValue)
 // 戻り値: 0 成功, -1 キャンセル/入力エラー, -2 在庫不足
 int inputQuantity(int productId, int *quantityOut)
 {
+    // 数量入力は行わず、常に1個購入
     if (quantityOut == NULL) {
         return -1;
     }
-
-    int product_index = -1;
-    for (int i = 0; i < g_product_count; i++) {
-        if (g_products[i].is_active && g_products[i].product_id == productId) {
-            product_index = i;
-            break;
-        }
-    }
-
-    if (product_index < 0) {
-        printf("error: 指定された商品が見つかりません。\n");
-        return -1;
-    }
-
-    int max_quantity = g_products[product_index].stock;
-    int quantity;
-
-    if (max_quantity <= 0) {
-        return -2; // 在庫切れ
-    }
-
-    if (readInt08("購入数量を入力してください: ", &quantity) != 0) {
-        printf("error: 入力を読み取れませんでした。\n");
-        return -1;
-    }
-
-    if (quantity <= 0) {
-        printf("error: 1以上の数量を入力してください。\n");
-        return -1;
-    }
-
-    if (quantity > max_quantity) {
-        printf("error: 在庫を超えています。最大 %d 個まで入力できます。\n", max_quantity);
-        return -2;
-    }
-
-    *quantityOut = quantity;
+    *quantityOut = 1;
     return 0;
 }

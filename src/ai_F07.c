@@ -156,25 +156,22 @@ int executePurchase(void)
     g_current_transaction.session_id = g_current_session_id;
     g_current_transaction.transaction_id = g_next_transaction_id;
 
-    /* 商品選択→数量入力。数量が在庫不足なら再度商品選択へ戻る */
+    /* 商品選択→数量入力省略。常に1個購入 */
     while (1) {
         if (selectProduct() != 0) {
             return -1;
         }
-
-        int qres = inputQuantity(g_current_transaction.product_id, &g_current_transaction.quantity);
-        if (qres == 0) {
-            break; /* 正常 */
+        int product_index = findProductIndex(g_current_transaction.product_id);
+        if (product_index < 0) {
+            printf("error: 商品が見つかりません。\n");
+            return -1;
         }
-        if (qres == -1) {
-            return -1; /* キャンセルや入力エラー */
-        }
-        if (qres == -2) {
+        if (g_products[product_index].stock < 1) {
             printf("error: 在庫不足です。別の商品を選択してください。\n");
-            continue; /* 商品選びからやり直す */
+            continue;
         }
-        /* 想定外の戻り値はエラー扱い */
-        return -1;
+        g_current_transaction.quantity = 1;
+        break;
     }
 
     subtotal = displaySubtotal(g_current_transaction.product_id, g_current_transaction.quantity);
