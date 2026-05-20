@@ -18,8 +18,9 @@ void initializeSystem(void);
 int executePurchase(void);
 // ログを表示しCSVに保存する関数（F14）
 int showAndSaveLogs(void);
-// 商品を補充する関数（F06）
-void restockProducts(void);
+void restockProducts(void); // プロトタイプ宣言を追加
+void editProduct(void); // プロトタイプ宣言を追加
+void registerProduct(void); // プロトタイプ宣言を追加
 
 /*
  * 標準入力バッファをクリアする関数
@@ -50,9 +51,11 @@ int main(void) {
         printf("1: 商品一覧表示\n");
         printf("2: 購入処理\n");
         printf("3: ログ表示/CSV保存\n");
-        printf("4: 商品の補充\n"); // 新しいメニュー項目を追加
+        printf("4: 商品の補充\n");
+        printf("5: 商品登録\n");
+        printf("6: 商品情報編集\n");
         printf("9: 終了\n");
-        printf("選択してください (1-4, 9): ");
+        printf("選択してください (1-6, 9): ");
 
         // ユーザー入力を取得
         if (scanf("%d", &userInput) != 1) {
@@ -79,16 +82,20 @@ int main(void) {
             showAndSaveLogs();
             break;
         case 4:
-            // 商品補充
             restockProducts();
+            break;
+        case 5:
+            registerProduct(); // 商品登録を呼び出し
+            break;
+        case 6:
+            editProduct(); // 商品情報編集を呼び出し
             break;
         case 9:
             // 終了
             printf("終了します。\n");
             break;
         default:
-            // 無効な入力
-            printf("error: 1〜4 または 9 を入力してください。\n");
+            printf("error: 1〜6 または 9 を入力してください。\n");
             break;
         }
     } while (userInput != 9);
