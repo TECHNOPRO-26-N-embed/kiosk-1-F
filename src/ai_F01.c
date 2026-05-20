@@ -1,5 +1,5 @@
-
 #include <stdio.h>
+#include <string.h>
 #include "global.h"
 
 // このファイルは「商品マスタ管理」の例です。
