@@ -111,5 +111,7 @@ extern char g_sales_log_csv_path[MAX_PATH_LEN];
 extern char g_operation_log_csv_path[MAX_PATH_LEN];
 /* 故障予知CSVの出力先パス。 */
 extern char g_error_prediction_csv_path[MAX_PATH_LEN];
+/* エラーログCSVの出力先パス。 */
+extern char g_error_log_csv_path[MAX_PATH_LEN];
 
 #endif
