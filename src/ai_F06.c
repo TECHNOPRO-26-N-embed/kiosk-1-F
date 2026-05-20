@@ -56,6 +56,22 @@ void replaceProduct(void) {
            g_products[index].stock);
 }
 
+// 商品補充関数（全商品の在庫数を最大値に更新）
+void restockProducts(void) {
+    if (g_product_count == 0) {
+        printf("\nエラー: 補充する商品が登録されていません。\n");
+        return;
+    }
+
+    for (int i = 0; i < g_product_count; i++) {
+        if (g_products[i].is_active) {
+            g_products[i].stock = MAX_STOCK_PER_PRODUCT;
+        }
+    }
+
+    printf("\n全ての商品が最大在庫数に補充されました。\n");
+}
+
 // int main(void) {
 //     g_product_count = 3;
 //     g_products[0] = (Product){1, "コーラ", 120, 10, 1};
@@ -63,5 +79,6 @@ void replaceProduct(void) {
 //     g_products[2] = (Product){3, "水", 80, 15, 1};
 
 //     replaceProduct();
+//     restockProducts();
 //     return 0;
 // }
