@@ -2,16 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <fcntl.h>
+#include <io.h>
 
 /*
  * ai_F12.c
  * 役割: 購入確定処理（F12）
  * - 購入内容を確定し、在庫・売上・ログを更新する
+ * - エラー時には適切なログを記録
  * - ai_main.cや購入処理から呼び出されることを想定
  */
 
 /*
- * 現在時刻をYYYY-MM-DD HH:MM:SS形式で取得
+ * 現在時刻を取得する関数
+ * - フォーマット: YYYY-MM-DD HH:MM:SS
  * buf: 20バイト以上のバッファを渡すこと
  */
 void getCurrentTimestamp(char *buf) {
@@ -22,6 +26,8 @@ void getCurrentTimestamp(char *buf) {
 
 /*
  * 購入確定処理
+ * - 在庫を減算し、購入ログを記録
+ * - エラー時にはエラーログを記録
  * 引数:
  *   Transaction *trans: 購入取引情報（事前に金額・数量等をセット済み）
  * 戻り値:
@@ -64,7 +70,8 @@ int finalizeTransaction(Transaction *trans) {
         // 故障予知ログも記録（省略可）
         return -2;
     }
-    // CSV: 取引ID,セッションID,日時,商品ID,単価,数量,小計,投入金額,釣銭
+    _setmode(_fileno(fp), _O_U8TEXT); // Set UTF-8 mode
+
     fprintf(fp, "%d,%d,%s,%d,%d,%d,%d,%d,%d\n",
         trans->transaction_id,
         trans->session_id,
@@ -80,16 +87,20 @@ int finalizeTransaction(Transaction *trans) {
 
     // 操作ログCSVに追記
     FILE *fp2 = fopen(g_operation_log_csv_path, "a");
-    if (fp2) {
-        // 操作ログ: log_id,session_id,timestamp,action_type,detail,result,error_code
-        fprintf(fp2, "%d,%d,%s,BUY,商品ID:%d,OK,\n",
-            g_next_operation_log_id++,
-            trans->session_id,
-            trans->timestamp,
-            trans->product_id
-        );
-        fclose(fp2);
+    if (!fp2) {
+        // ファイル書込エラー
+        // 故障予知ログも記録（省略可）
+        return -2;
     }
+    _setmode(_fileno(fp2), _O_U8TEXT); // Set UTF-8 mode
+
+    fprintf(fp2, "%d,%d,%s,BUY,商品ID:%d,OK,\n",
+        trans->transaction_id,
+        trans->session_id,
+        trans->timestamp,
+        trans->product_id
+    );
+    fclose(fp2);
     // 正常終了
     return 0;
 }
