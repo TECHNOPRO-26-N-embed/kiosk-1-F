@@ -1,103 +1,100 @@
 #include <stdio.h>
 #include "global.h"
+#include "ai_F01.c"
+#include "ai_F11.c"
+#include "ai_F12.c"
+#include "ai_F14.c"
 
-/*
- * ai_main.c
- * 役割:
- * - ユーザーが直接操作するエントリポイント
- * - 機能本体は他ファイルの関数を呼び出して実行
- *
- * いまはファイル名未確定のため extern で宣言しています。
- * 後でヘッダが確定したら #include に置き換えてください。
- */
-
-/* ===== 他ファイル実装予定の関数 ===== */
-extern void initializeSystem(void);
-extern int displayProductList(void);    /* F01 */
-extern int registerProduct(void);       /* F02 */
-extern int editProduct(void);           /* F03 */
-extern int deleteProduct(void);         /* F04 */
-extern int executePurchase(void);       /* F05-F12 */
-extern int showAndSaveLogs(void);       /* F14: 未実装なら-1などを返す */
-
-static void flushInputBuffer(void)
-{
-    int ch;
-    while ((ch = getchar()) != '\n' && ch != EOF) {
-        ;
-    }
+/* ===== スタブ関数（未実装部分） ===== */
+int selectProduct(void) {
+    printf("[スタブ] 商品選択を実行中...\n");
+    return 1; // 仮に商品ID 1 を返す
 }
 
-static int readMenuInput(int *outValue)
-{
-    if (scanf("%d", outValue) != 1) {
-        flushInputBuffer();
-        return -1;
-    }
-    flushInputBuffer();
-    return 0;
+int inputQuantity(int productId, int *quantityOut) {
+    printf("[スタブ] 数量入力を実行中...\n");
+    *quantityOut = 1; // 仮に数量 1 を設定
+    return 0; // 正常終了
 }
 
-static void printMainMenu(void)
-{
-    printf("\n=== デジタル自販機メニュー ===\n");
-    printf("1: 商品一覧表示\n");
-    printf("2: 商品登録\n");
-    printf("3: 商品情報編集\n");
-    printf("4: 商品削除\n");
-    printf("5: 購入処理\n");
-    printf("6: ログ表示/CSV保存\n");
-    printf("9: 終了\n");
-    printf("選択してください (1-6, 9): ");
-}
-
-int main(void)
-{
+/* ===== メイン関数 ===== */
+int main(void) {
     int userInput = 0;
-    int purchaseResult;
+    int productId;
+    int quantity;
+    int subtotal;
+    int insertedAmount;
+    int change;
+    Transaction trans = {0};
 
     initializeSystem();
 
-    if (g_current_session_id <= 0) {
-        g_current_session_id = 1;
-    }
-
     do {
-        printMainMenu();
+        printf("\n=== デジタル自販機メニュー ===\n");
+        printf("1: 商品一覧表示\n");
+        printf("2: 購入処理\n");
+        printf("3: ログ表示/CSV保存\n");
+        printf("9: 終了\n");
+        printf("選択してください (1-3, 9): ");
 
-        if (readMenuInput(&userInput) != 0) {
+        if (scanf("%d", &userInput) != 1) {
             printf("error: 半角数字で入力してください。\n");
             continue;
         }
 
         switch (userInput) {
         case 1:
-            (void)displayProductList();
+            displayProductList();
             break;
         case 2:
-            (void)registerProduct();
+            // 商品選択（F07）
+            productId = selectProduct();
+            if (productId < 0) {
+                printf("商品選択がキャンセルされました。\n");
+                break;
+            }
+
+            // 数量入力（F08）
+            if (inputQuantity(productId, &quantity) != 0) {
+                printf("数量入力に失敗しました。\n");
+                break;
+            }
+
+            // 釣銭計算（F11）
+            subtotal = quantity * 100; // 仮に単価100円とする
+            printf("小計: %d 円\n", subtotal);
+            insertedAmount = 500; // 仮に500円投入
+            change = calculateChange(insertedAmount, subtotal);
+            if (change < 0) {
+                printf("投入金額が不足しています。\n");
+                break;
+            }
+            printChange(change);
+
+            // 購入確定（F12）
+            trans.transaction_id = 1; // 仮の取引ID
+            trans.product_id = productId;
+            trans.quantity = quantity;
+            trans.unit_price = 100; // 仮の単価
+            trans.subtotal = subtotal;
+            trans.inserted_amount = insertedAmount;
+            trans.change_amount = change;
+
+            if (finalizeTransaction(&trans) != 0) {
+                printf("購入確定に失敗しました。\n");
+                break;
+            }
+
+            printf("購入が正常に完了しました。\n");
             break;
         case 3:
-            (void)editProduct();
-            break;
-        case 4:
-            (void)deleteProduct();
-            break;
-        case 5:
-            purchaseResult = executePurchase();
-            if (purchaseResult == 0) {
-                g_current_session_id++;
-                printf("\n[案内] ご購入ありがとうございました。次のお客様どうぞ。\n");
-            }
-            break;
-        case 6:
-            (void)showAndSaveLogs();
+            showAndSaveLogs();
             break;
         case 9:
             printf("終了します。\n");
             break;
         default:
-            printf("error: 1〜6 または 9 を入力してください。\n");
+            printf("error: 1〜3 または 9 を入力してください。\n");
             break;
         }
     } while (userInput != 9);
