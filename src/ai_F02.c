@@ -6,7 +6,15 @@
 extern void deleteProduct(void); // 商品削除関数のプロトタイプ宣言（他ファイル実装想定)
 
 void registerProduct(void) {
-    if (g_product_count >= MAX_PRODUCTS) {
+    int empty_index = -1;
+    for (int i = 0; i < g_product_count; i++) {
+        if (g_products[i].is_active == 0) {
+            empty_index = i;
+            break;
+        }
+    }
+
+    if (g_product_count >= MAX_PRODUCTS && empty_index == -1) {
         printf("\n商品登録エラー: 商品数が上限（%d件）に達しています。\n", MAX_PRODUCTS);
         printf("商品を新規登録するには、既存の商品を削除してください。\n");
         printf("今すぐ商品を削除しますか？ (1: はい, 0: いいえ): ");
@@ -22,7 +30,6 @@ void registerProduct(void) {
     }
 
     Product new_product = {0};
-    new_product.product_id = g_product_count + 1;
     new_product.is_active = 1;
 
     printf("\n新しい商品を登録します。\n");
@@ -43,10 +50,18 @@ void registerProduct(void) {
         }
     }
 
-    g_products[g_product_count] = new_product;
-    g_product_count++;
-
-    printf("\n商品が正常に登録されました。\n");
+    if (empty_index != -1) {
+        // 空き枠を再利用
+        new_product.product_id = g_products[empty_index].product_id; // IDはそのまま
+        g_products[empty_index] = new_product;
+        printf("\n空き枠(ID:%d)を再利用して商品が登録されました。\n", new_product.product_id);
+    } else {
+        // 新規追加
+        new_product.product_id = g_product_count + 1;
+        g_products[g_product_count] = new_product;
+        g_product_count++;
+        printf("\n商品が正常に登録されました。\n");
+    }
     printf("ID: %d, 商品名: %s, 価格: %d, 在庫数: %d\n",
            new_product.product_id, new_product.product_name, new_product.price, new_product.stock);
 }
