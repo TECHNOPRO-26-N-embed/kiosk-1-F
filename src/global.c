@@ -17,7 +17,7 @@ int g_next_operation_log_id = 1;
 int g_next_error_record_id = 1;
 
 /* CSV出力先のデフォルト設定 */
-char g_sales_log_csv_path[MAX_PATH_LEN] = "data/sales_log.csv";
+char g_sales_log_csv_path[MAX_PATH_LEN] = "data/sales_log_utf8.csv";
 char g_operation_log_csv_path[MAX_PATH_LEN] = "data/operation_log.csv";
 char g_error_prediction_csv_path[MAX_PATH_LEN] = "data/error_prediction.csv";
 char g_error_log_csv_path[MAX_PATH_LEN] = "data/error_log.csv";
