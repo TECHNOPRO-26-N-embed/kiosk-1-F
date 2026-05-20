@@ -116,33 +116,20 @@ static int selectProduct(void)
 
 void initializeSystem(void)
 {
-    if (showAndSaveLogs() != 0) {
+    // CSVファイルの初期化のみ（表示なし）
+    if (initializeLogFiles() != 0) {
         fprintf(stderr, "warning: ログファイルの初期化に失敗しました。\n");
     }
 
     if (g_product_count == 0) {
-        g_product_count = 3;
-
-        g_products[0].product_id = 1;
-        strncpy(g_products[0].product_name, "コーラ", MAX_NAME_LEN - 1);
-        g_products[0].product_name[MAX_NAME_LEN - 1] = '\0';
-        g_products[0].price = 120;
-        g_products[0].stock = 10;
-        g_products[0].is_active = 1;
-
-        g_products[1].product_id = 2;
-        strncpy(g_products[1].product_name, "お茶", MAX_NAME_LEN - 1);
-        g_products[1].product_name[MAX_NAME_LEN - 1] = '\0';
-        g_products[1].price = 100;
-        g_products[1].stock = 20;
-        g_products[1].is_active = 1;
-
-        g_products[2].product_id = 3;
-        strncpy(g_products[2].product_name, "水", MAX_NAME_LEN - 1);
-        g_products[2].product_name[MAX_NAME_LEN - 1] = '\0';
-        g_products[2].price = 80;
-        g_products[2].stock = 15;
-        g_products[2].is_active = 1;
+        g_product_count = 50;
+        for (int i = 0; i < 50; i++) {
+            g_products[i].product_id = i + 1;
+            snprintf(g_products[i].product_name, MAX_NAME_LEN, "商品%d", i + 1);
+            g_products[i].price = 100 + (i + 1) * 10;
+            g_products[i].stock = 50;
+            g_products[i].is_active = 1;
+        }
     }
 }
 

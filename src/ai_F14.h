@@ -23,6 +23,9 @@ int handleError(const char *errorType,
                 const char *message,
                 const char *severity);
 
+/* 起動時用: CSVファイル初期化のみ（画面表示なし） */
+int initializeLogFiles(void);
+
 /* メニューから呼び出すF14入口: ログファイル生成/確認と保存先案内 */
 int showAndSaveLogs(void);
 
