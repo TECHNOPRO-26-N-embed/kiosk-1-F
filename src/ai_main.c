@@ -1,178 +1,107 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "global.h"
 
 /*
  * ai_main.c
- *
  * 役割:
- * - 他ファイルに分割実装される関数を呼び出すためのエントリ/ハブ
- * - 実装ファイル名が未確定でも使えるようにextern宣言で接続
+ * - ユーザーが直接操作するエントリポイント
+ * - 機能本体は他ファイルの関数を呼び出して実行
  *
- * 後でヘッダが確定したら、extern宣言を削除して #include "xxx.h" に置き換えてください。
+ * いまはファイル名未確定のため extern で宣言しています。
+ * 後でヘッダが確定したら #include に置き換えてください。
  */
 
-#define MAX_SESSION_LEN 20
-#define MAX_NAME_LEN 100
-
-/* ===== 型定義（将来は共通ヘッダへ移動推奨） ===== */
-typedef struct {
-	int transactionId;
-	char sessionId[MAX_SESSION_LEN];
-	int productId;
-	char productName[MAX_NAME_LEN];
-	int price;
-	int quantity;
-	int subtotal;
-	int amountReceived;
-	int change;
-	char timestamp[20];
-	char result[10];
-} Transaction;
-
-typedef struct {
-	int logId;
-	char sessionId[MAX_SESSION_LEN];
-	char timestamp[20];
-	char operationType[30];
-	char details[200];
-	char result[10];
-	int errorCode;
-} OperationLog;
-
-/* ===== 外部関数宣言（他ファイル実装予定） ===== */
+/* ===== 他ファイル実装予定の関数 ===== */
 extern void initializeSystem(void);
-extern int displayMainMenu(void);
-extern int getValidInput(int min, int max);
-extern char *getInputString(int maxLen);
-extern void getCurrentTimestamp(char *buf);
+extern int displayProductList(void);    /* F01 */
+extern int registerProduct(void);       /* F02 */
+extern int editProduct(void);           /* F03 */
+extern int deleteProduct(void);         /* F04 */
+extern int executePurchase(void);       /* F05-F12 */
+extern int showAndSaveLogs(void);       /* F14: 未実装なら-1などを返す */
 
-extern int displayProductList(void);
-extern int registerProduct(void);
-extern int editProduct(void);
-extern int deleteProduct(void);
-extern int executePurchase(void);
-
-extern int selectProduct(void);
-extern int inputQuantity(int productId, int *quantityOut);
-extern int calculateSubtotal(int price, int quantity);
-extern int receivePayment(int subtotal, int *amountReceivedOut);
-extern int calculateChange(int amountReceived, int subtotal);
-extern int finalizeTransaction(Transaction *trans);
-
-extern int appendOperationLog(OperationLog *log);
-extern int appendTransactionLog(Transaction *trans);
-extern int appendFailurePredictLog(const char *errorType,
-								   const char *location,
-								   const char *inputValue,
-								   const char *message,
-								   int severity);
-
-static int handleMainMenuSelection(int selectedMenu)
+static void flushInputBuffer(void)
 {
-	switch (selectedMenu) {
-	case 1:
-		return displayProductList();
-	case 2:
-		return registerProduct();
-	case 3:
-		return editProduct();
-	case 4:
-		return deleteProduct();
-	case 5:
-		return executePurchase();
-	case 6:
-		/* TODO: 必要ならログ閲覧機能を別関数として追加 */
-		printf("[INFO] ログ機能は実装予定です。\n");
-		return 0;
-	case 9:
-		return 1; /* 終了シグナル */
-	default:
-		printf("[WARN] 無効な選択です。\n");
-		return 0;
-	}
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+        ;
+    }
 }
 
-/*
- * 他ファイルから呼び出せる実行関数。
- * 例: main.c から runKioskApp();
- */
-int runKioskApp(void)
+static int readMenuInput(int *outValue)
 {
-	int selectedMenu;
-	int shouldExit = 0;
-
-	initializeSystem();
-
-	while (!shouldExit) {
-		selectedMenu = displayMainMenu();
-		if (handleMainMenuSelection(selectedMenu) == 1) {
-			shouldExit = 1;
-		}
-
-		/*
-		 * F13: 複数客対応（連続利用）
-		 * 購入完了後もシステムは終了せず、次のお客様が続けて利用可能。
-		 */
-		if (!shouldExit) {
-			printf("\n[案内] 次のお客様どうぞ。\n\n");
-		}
-	}
-
-	printf("[INFO] システムを終了します。\n");
-	return 0;
+    if (scanf("%d", outValue) != 1) {
+        flushInputBuffer();
+        return -1;
+    }
+    flushInputBuffer();
+    return 0;
 }
 
-/*
- * 各関数の使用例テンプレート。
- * 実行はしません。必要に応じて呼び出して利用してください。
- */
-void apiUsageExamples(void)
+static void printMainMenu(void)
 {
-	int menu;
-	int productId;
-	int quantity;
-	int subtotal;
-	int amountReceived;
-	int change;
-	char *nameBuf;
-	char timestamp[20] = {0};
-	Transaction trans;
-	OperationLog opLog;
+    printf("\n=== デジタル自販機メニュー ===\n");
+    printf("1: 商品一覧表示\n");
+    printf("2: 商品登録\n");
+    printf("3: 商品情報編集\n");
+    printf("4: 商品削除\n");
+    printf("5: 購入処理\n");
+    printf("6: ログ表示/CSV保存\n");
+    printf("9: 終了\n");
+    printf("選択してください (1-6, 9): ");
+}
 
-	memset(&trans, 0, sizeof(trans));
-	memset(&opLog, 0, sizeof(opLog));
+int main(void)
+{
+    int userInput = 0;
+    int purchaseResult;
 
-	initializeSystem();
-	menu = displayMainMenu();
-	(void)menu;
+    initializeSystem();
 
-	(void)getValidInput(1, 9);
-	nameBuf = getInputString(99);
-	free(nameBuf);
+    if (g_current_session_id <= 0) {
+        g_current_session_id = 1;
+    }
 
-	getCurrentTimestamp(timestamp);
+    do {
+        printMainMenu();
 
-	(void)displayProductList();
-	(void)registerProduct();
-	(void)editProduct();
-	(void)deleteProduct();
-	(void)executePurchase();
+        if (readMenuInput(&userInput) != 0) {
+            printf("error: 半角数字で入力してください。\n");
+            continue;
+        }
 
-	productId = selectProduct();
-	(void)inputQuantity(productId, &quantity);
-	subtotal = calculateSubtotal(120, 2);
-	(void)receivePayment(subtotal, &amountReceived);
-	change = calculateChange(amountReceived, subtotal);
-	(void)change;
+        switch (userInput) {
+        case 1:
+            (void)displayProductList();
+            break;
+        case 2:
+            (void)registerProduct();
+            break;
+        case 3:
+            (void)editProduct();
+            break;
+        case 4:
+            (void)deleteProduct();
+            break;
+        case 5:
+            purchaseResult = executePurchase();
+            if (purchaseResult == 0) {
+                g_current_session_id++;
+                printf("\n[案内] ご購入ありがとうございました。次のお客様どうぞ。\n");
+            }
+            break;
+        case 6:
+            (void)showAndSaveLogs();
+            break;
+        case 9:
+            printf("終了します。\n");
+            break;
+        default:
+            printf("error: 1〜6 または 9 を入力してください。\n");
+            break;
+        }
+    } while (userInput != 9);
 
-	(void)finalizeTransaction(&trans);
-	(void)appendOperationLog(&opLog);
-	(void)appendTransactionLog(&trans);
-	(void)appendFailurePredictLog("INPUT_ERROR",
-								  "displayMainMenu",
-								  "abc",
-								  "数字以外が入力されました",
-								  2);
+    return 0;
 }
 
