@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
+#include <sys/stat.h>
+#if defined(_WIN32)
+#include <direct.h>
+#endif
 
 #include "ai_F14.h"
 
@@ -13,6 +18,149 @@
  */
 
 #define TIMESTAMP_BUF_LEN 20
+#define LOG_PREVIEW_LINES 6
+#define LOG_LINE_BUF_LEN 512
+
+static int startsWith(const char *text, const char *prefix)
+{
+	if (text == NULL || prefix == NULL) {
+		return 0;
+	}
+	while (*prefix != '\0') {
+		if (*text != *prefix) {
+			return 0;
+		}
+		text++;
+		prefix++;
+	}
+	return 1;
+}
+
+static int directoryExists(const char *path)
+{
+	struct stat st;
+	if (path == NULL) {
+		return 0;
+	}
+	if (stat(path, &st) != 0) {
+		return 0;
+	}
+	return (st.st_mode & S_IFDIR) != 0;
+}
+
+static int createDirectoryIfNeeded(const char *dir)
+{
+	if (dir == NULL || dir[0] == '\0') {
+		return 0;
+	}
+	if (directoryExists(dir)) {
+		return 0;
+	}
+#if defined(_WIN32)
+	if (_mkdir(dir) == 0 || errno == EEXIST) {
+		return 0;
+	}
+#else
+	if (mkdir(dir, 0755) == 0 || errno == EEXIST) {
+		return 0;
+	}
+#endif
+	return -1;
+}
+
+static int ensureParentDirectory(const char *path)
+{
+	char dir[MAX_PATH_LEN];
+	const char *slashPos;
+	size_t len;
+
+	if (path == NULL) {
+		return -1;
+	}
+
+	slashPos = strrchr(path, '/');
+	if (slashPos == NULL) {
+		return 0;
+	}
+
+	len = (size_t)(slashPos - path);
+	if (len == 0 || len >= sizeof(dir)) {
+		return -1;
+	}
+
+	memcpy(dir, path, len);
+	dir[len] = '\0';
+	return createDirectoryIfNeeded(dir);
+}
+
+static void adjustDataPathBase(char *path, size_t pathSize)
+{
+	char resolved[MAX_PATH_LEN];
+
+	if (path == NULL || pathSize == 0) {
+		return;
+	}
+
+	if (startsWith(path, "data/") && !directoryExists("data") && directoryExists("../data")) {
+		snprintf(resolved, sizeof(resolved), "../%s", path);
+		strncpy(path, resolved, pathSize - 1);
+		path[pathSize - 1] = '\0';
+		return;
+	}
+
+	if (startsWith(path, "../data/") && !directoryExists("../data") && directoryExists("data")) {
+		strncpy(path, path + 3, pathSize - 1);
+		path[pathSize - 1] = '\0';
+	}
+}
+
+static void normalizeAllLogPaths(void)
+{
+	adjustDataPathBase(g_sales_log_csv_path, sizeof(g_sales_log_csv_path));
+	adjustDataPathBase(g_operation_log_csv_path, sizeof(g_operation_log_csv_path));
+	adjustDataPathBase(g_error_prediction_csv_path, sizeof(g_error_prediction_csv_path));
+	adjustDataPathBase(g_error_log_csv_path, sizeof(g_error_log_csv_path));
+}
+
+static void printCsvPreview(const char *title, const char *path)
+{
+	FILE *fp;
+	char lines[LOG_PREVIEW_LINES][LOG_LINE_BUF_LEN];
+	char line[LOG_LINE_BUF_LEN];
+	int count = 0;
+	int start;
+
+	printf("\n[%s]\n", title);
+	printf("path: %s\n", path);
+
+	fp = fopen(path, "r");
+	if (fp == NULL) {
+		printf("(読み込み失敗)\n");
+		return;
+	}
+
+	while (fgets(line, sizeof(line), fp) != NULL) {
+		strncpy(lines[count % LOG_PREVIEW_LINES], line, LOG_LINE_BUF_LEN - 1);
+		lines[count % LOG_PREVIEW_LINES][LOG_LINE_BUF_LEN - 1] = '\0';
+		count++;
+	}
+	fclose(fp);
+
+	if (count == 0) {
+		printf("(空ファイル)\n");
+		return;
+	}
+
+	if (count <= LOG_PREVIEW_LINES) {
+		start = 0;
+	} else {
+		start = count - LOG_PREVIEW_LINES;
+	}
+
+	for (int i = start; i < count; i++) {
+		printf("%s", lines[i % LOG_PREVIEW_LINES]);
+	}
+}
 
 /* NULL安全に文字列をコピーする補助関数 */
 static void copySafe(char *dst, size_t dstSize, const char *src)
@@ -72,6 +220,10 @@ static int ensureCsvHeader(const char *path, const char *header)
 {
 	FILE *fp;
 
+	if (ensureParentDirectory(path) != 0) {
+		return -1;
+	}
+
 	fp = fopen(path, "r");
 	if (fp != NULL) {
 		fclose(fp);
@@ -102,6 +254,8 @@ static const char *findProductNameById(int productId)
 /* 本機能で使う全CSVファイルを初期化（存在確認＋ヘッダ保証） */
 static int ensureAllLogFiles(void)
 {
+	normalizeAllLogPaths();
+
 	if (ensureCsvHeader(g_sales_log_csv_path,
 						"transaction_id,session_id,timestamp,product_id,product_name,unit_price,quantity,subtotal,inserted_amount,change_amount,result") != 0) {
 		return -1;
@@ -329,6 +483,15 @@ int handleError(const char *errorType,
 	return -1;
 }
 
+/* 起動時用: CSV生成/確認のみ実施（表示なし） */
+int initializeLogFiles(void)
+{
+	if (ensureAllLogFiles() != 0) {
+		return -1;
+	}
+	return 0;
+}
+
 /* F14メニュー用の入口。ログファイル初期化と保存先表示を行う */
 int showAndSaveLogs(void)
 {
@@ -345,6 +508,12 @@ int showAndSaveLogs(void)
 	printf("操作ログ: %s\n", g_operation_log_csv_path);
 	printf("故障予知ログ: %s\n", g_error_prediction_csv_path);
 	printf("エラーログ: %s\n", g_error_log_csv_path);
+
+	printf("\n=== CSV内容プレビュー（末尾%d行）===\n", LOG_PREVIEW_LINES);
+	printCsvPreview("販売ログ", g_sales_log_csv_path);
+	printCsvPreview("操作ログ", g_operation_log_csv_path);
+	printCsvPreview("故障予知ログ", g_error_prediction_csv_path);
+	printCsvPreview("エラーログ", g_error_log_csv_path);
 
 	(void)logOperation("SHOW_LOG_PATHS",
 					   "displayed csv output destinations",

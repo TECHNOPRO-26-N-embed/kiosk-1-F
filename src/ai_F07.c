@@ -116,7 +116,7 @@ static int selectProduct(void)
 
 void initializeSystem(void)
 {
-    if (showAndSaveLogs() != 0) {
+    if (initializeLogFiles() != 0) {
         fprintf(stderr, "warning: ログファイルの初期化に失敗しました。\n");
     }
 
