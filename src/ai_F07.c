@@ -4,6 +4,10 @@
 #include "global.h"
 #include "ai_F14.h"
 
+// 商品選択および数量入力を担当するモジュール
+// - 商品一覧を表示し、ユーザーが購入する商品を選択できる
+// - 選択された商品の数量を入力し、在庫を確認する
+
 int displaySubtotal(int product_id, int quantity);
 int receivePayment(int subtotal, int *amountReceivedOut);
 int calculateChange(int inserted_amount, int subtotal);
@@ -53,6 +57,9 @@ static int findProductIndex(int product_id)
     return -1;
 }
 
+// 商品一覧を表示する関数
+// - 在庫がある商品のみを表示
+// - 商品ID、名前、価格、在庫数をフォーマットして出力
 static void printAvailableProducts(void)
 {
     printf("\n=== 商品選択 ===\n");
@@ -80,6 +87,9 @@ static void printAvailableProducts(void)
     }
 }
 
+// 商品を選択する関数
+// - ユーザーが入力した商品IDを検証
+// - 在庫がある場合に選択を確定
 static int selectProduct(void)
 {
     int product_id;

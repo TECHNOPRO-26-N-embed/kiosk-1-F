@@ -3,6 +3,9 @@
 #include <time.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <io.h>
+
 #if defined(_WIN32)
 #include <direct.h>
 #endif
@@ -21,6 +24,9 @@
 #define LOG_PREVIEW_LINES 6
 #define LOG_LINE_BUF_LEN 512
 
+// 文字列が特定の接頭辞で始まるか確認する関数
+// - 引数: text（対象文字列）, prefix（接頭辞）
+// - 戻り値: 1（接頭辞で始まる場合）、0（それ以外）
 static int startsWith(const char *text, const char *prefix)
 {
 	if (text == NULL || prefix == NULL) {
@@ -36,6 +42,9 @@ static int startsWith(const char *text, const char *prefix)
 	return 1;
 }
 
+// ディレクトリが存在するか確認する関数
+// - 引数: path（ディレクトリパス）
+// - 戻り値: 1（存在する場合）、0（存在しない場合）
 static int directoryExists(const char *path)
 {
 	struct stat st;
@@ -48,6 +57,9 @@ static int directoryExists(const char *path)
 	return (st.st_mode & S_IFDIR) != 0;
 }
 
+// ディレクトリが存在しない場合、必要に応じて作成する関数
+// - 引数: dir（ディレクトリパス）
+// - 戻り値: 0（成功）、-1（失敗）
 static int createDirectoryIfNeeded(const char *dir)
 {
 	if (dir == NULL || dir[0] == '\0') {
@@ -68,6 +80,9 @@ static int createDirectoryIfNeeded(const char *dir)
 	return -1;
 }
 
+// ファイルの親ディレクトリが存在しない場合、必要に応じて作成する関数
+// - 引数: path（ファイルパス）
+// - 戻り値: 0（成功）、-1（失敗）
 static int ensureParentDirectory(const char *path)
 {
 	char dir[MAX_PATH_LEN];
@@ -93,6 +108,9 @@ static int ensureParentDirectory(const char *path)
 	return createDirectoryIfNeeded(dir);
 }
 
+// データパスベースの調整
+// - 引数: path（パス）、pathSize（パスの長さ）
+// - 戻り値: 無
 static void adjustDataPathBase(char *path, size_t pathSize)
 {
 	char resolved[MAX_PATH_LEN];
@@ -114,6 +132,9 @@ static void adjustDataPathBase(char *path, size_t pathSize)
 	}
 }
 
+// 全ログパスの調整
+// - 引数: 無
+// - 戻り値: 無
 static void normalizeAllLogPaths(void)
 {
 	adjustDataPathBase(g_sales_log_csv_path, sizeof(g_sales_log_csv_path));
@@ -122,6 +143,9 @@ static void normalizeAllLogPaths(void)
 	adjustDataPathBase(g_error_log_csv_path, sizeof(g_error_log_csv_path));
 }
 
+// CSVプレビューの表示
+// - 引数: title（タイトル）、path（ファイルパス）
+// - 戻り値: 無
 static void printCsvPreview(const char *title, const char *path)
 {
 	FILE *fp;
@@ -301,6 +325,7 @@ int logOperation(const char *actionType, const char *detail, const char *result,
 	if (fp == NULL) {
 		return -1;
 	}
+	_setmode(_fileno(fp), _O_U8TEXT); // Set UTF-8 mode
 
 	fprintf(fp, "%d,%d,", logEntry.log_id, logEntry.session_id);
 	writeCsvEscaped(fp, logEntry.timestamp);
@@ -344,6 +369,7 @@ int logSale(const Transaction *tx, const char *result)
 	if (fp == NULL) {
 		return -1;
 	}
+	_setmode(_fileno(fp), _O_U8TEXT); // Set UTF-8 mode
 
 	fprintf(fp,
 			"%d,%d,",
@@ -392,6 +418,7 @@ int logErrorPrediction(const char *errorType,
 	if (fp == NULL) {
 		return -1;
 	}
+	_setmode(_fileno(fp), _O_U8TEXT); // Set UTF-8 mode
 
 	fprintf(fp, "%d,", record.record_id);
 	writeCsvEscaped(fp, record.timestamp);
@@ -433,6 +460,7 @@ static int logError(const char *errorType,
 	if (fp == NULL) {
 		return -1;
 	}
+	_setmode(_fileno(fp), _O_U8TEXT); // Set UTF-8 mode
 
 	fprintf(fp, "%d,%d,", errorId, g_current_session_id);
 	writeCsvEscaped(fp, timestamp);
