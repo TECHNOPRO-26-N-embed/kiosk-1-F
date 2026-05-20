@@ -1,21 +1,11 @@
 #include <stdio.h>
 #include "global.h"
 #include "ai_F01.c"
+#include "ai_F07.c"
+#include "ai_F08.c"
 #include "ai_F11.c"
 #include "ai_F12.c"
 #include "ai_F14.c"
-
-/* ===== スタブ関数（未実装部分） ===== */
-int selectProduct(void) {
-    printf("[スタブ] 商品選択を実行中...\n");
-    return 1; // 仮に商品ID 1 を返す
-}
-
-int inputQuantity(int productId, int *quantityOut) {
-    printf("[スタブ] 数量入力を実行中...\n");
-    *quantityOut = 1; // 仮に数量 1 を設定
-    return 0; // 正常終了
-}
 
 /* ===== メイン関数 ===== */
 int main(void) {
